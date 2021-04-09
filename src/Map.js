@@ -115,7 +115,7 @@ const Countries = () => {
       return (
         <Country key={c.country_code}>
           <input
-            value={isFavorite(c.country_code)}
+            checked={isFavorite(c.country_code)}
             type="checkbox"
             onChange={e => {
               toggleFavorite(c.country_code);

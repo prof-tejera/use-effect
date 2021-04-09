@@ -1,17 +1,13 @@
-import React, { useContext, useState, useEffect, useReducer, useRef } from 'react';
-import styled from 'styled-components';
-import { token } from './config';
+import React from 'react';
+import AppProvider from './AppProvider';
 import Map from './Map';
 
-const Wrapper = styled.div`
-  margin: 100px auto;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-`;
-
 const App = () => {
-  return <Map />;
+  return (
+    <AppProvider>
+      <Map />
+    </AppProvider>
+  );
 };
 
 export default App;

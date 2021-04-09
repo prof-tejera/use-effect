@@ -4,7 +4,8 @@ import countries from './countries.json';
 const MapContextClass = React.createContext({});
 
 const MapProvider = ({ children }) => {
-  const [favorites, setFavorites] = useState({});
+  const storedFavorites = localStorage.getItem('mapFavorites') || '{}';
+  const [favorites, setFavorites] = useState(JSON.parse(storedFavorites));
 
   const toggleFavorite = country_code => {
     const newFavorites = { ...favorites };
@@ -16,6 +17,7 @@ const MapProvider = ({ children }) => {
     }
 
     setFavorites(newFavorites);
+    localStorage.setItem('mapFavorites', JSON.stringify(newFavorites));
   };
 
   const isFavorite = country_code => favorites[country_code];
