@@ -4,16 +4,17 @@
 // us to get and set a value, and have our component react to
 // changes very easily
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { useInterval } from "./hooks";
 
 const Counter = () => {
   const [count, setCount] = useState(0);
 
   return (
-    <Wrapper>
-      <div>Current {count}</div>
+    <div className="main-panel">
+      <div className="display">Current {count}</div>
       <button onClick={() => setCount(count + 1)}>Increment</button>
-    </Wrapper>
+    </div>
   );
 };
 
@@ -21,128 +22,81 @@ const App = () => {
   return <Counter />;
 };
 
-// Further, we can have an overarching state that we can "centralize"
-// and pass to other components as props, so they can be aware of changes
-// and react accordingly
-const Display = ({ count }) => {
-  return (
-    <div>
-      <div>Current {count}</div>
-    </div>
-  );
-};
-
+// We also covered useEffect, which allows us to perform
+// side-effects in our function components. We can mimic
+// componentDidMount, componentDidUpdate and componentWillUnmount
 const Counter = ({ count, setCount }) => {
+  useEffect(() => {
+    console.log("MOUNT Counter");
+
+    return () => {
+      console.log("before UNMOUNT Counter");
+    };
+  }, []);
+
   return (
-    <div>
-      <Display count={count} />
+    <div className="main-panel">
+      <div className="display">Current {count}</div>
       <button onClick={() => setCount(count + 1)}>Increment</button>
     </div>
   );
 };
 
 const App = () => {
+  const [mounted, setMounted] = useState(true);
   const [count, setCount] = useState(0);
-
-  return (
-    <Wrapper>
-      AppState: {JSON.stringify({ count })}
-      <Counter setCount={setCount} count={count} />
-    </Wrapper>
-  );
-};
-
-// We also covered useEffect, which allows us to perform
-// side-effects in our function components. We can mimic
-// componentDidMount, componentDidUpdate and componentWillUnmount
-
-const App = () => {
-  const [count, setCount] = useState(0);
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
 
   useEffect(() => {
-    console.log('I run on mount because I have no dependencies');
+    console.log("MOUNT App");
+
+    return () => {
+      console.log("before UNMOUNT App");
+    };
   }, []);
 
   useEffect(() => {
-    console.log('I run every time anything in this component changes');
+    console.log("after ANYTHING is updated");
+
+    return () => {
+      console.log("before ANYTHING is updated");
+    };
   });
 
   useEffect(() => {
-    console.log('I run only when count changes but not when text changes');
+    console.log("after COUNT is updated");
+
+    return () => {
+      console.log("before COUNT is updated");
+    };
   }, [count]);
 
   return (
-    <Wrapper>
-      AppState: {JSON.stringify({ count })}
-      <Counter setCount={setCount} count={count} />
-      <input value={text} onChange={e => setText(e.target.value)} />
-    </Wrapper>
+    <div>
+      <pre>AppState: {JSON.stringify({ count, text }, null, 2)}</pre>
+      {mounted && <Counter setCount={setCount} count={count} />}
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <button onClick={() => setMounted(!mounted)}>Unmount</button>
+    </div>
   );
 };
 
-// New built-in hook in react
 // useRef
-// returns an object with a 'current' property that holds a value
-// and persists for the lifetime of the component
-
-// Common use cases
-// 1. accessing the DOM
-const App = () => {
-  const inputRef = useRef();
-  const [toggle, setToggle] = useState(false);
-
-  useEffect(() => {
-    console.log(inputRef.current.value);
-  });
-
-  return (
-    <Wrapper>
-      <input ref={inputRef} />
-      <button onClick={() => setToggle(!toggle)}>Click</button>
-    </Wrapper>
-  );
-};
-
-const Map = () => {
-  const mapRef = useRef();
-
-  useEffect(() => {
-    mapboxgl.accessToken = token;
-    new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/streets-v11', // style URL
-      center: [-74.5, 40], // starting position [lng, lat]
-      zoom: 9, // starting zoom
-    });
-  }, []);
-
-  return (
-    <div
-      id="map"
-      ref={mapRef}
-      style={{
-        height: 300,
-        width: 300,
-      }}
-    ></div>
-  );
-};
-
-// However, useRef can be used for more than accessing the DOM.
-// this is a variable that is similar to state vars, but has two main
-// differences:
-// 1. setting a ref does NOT trigger a re-render
-// 2. you can set it directly, without a setter function
 const Timer = () => {
   const [count, setCount] = useState(0);
   const [running, setRunning] = useState(false);
   const interval = useRef();
 
+  useEffect(() => {
+    console.log("Triggering effect");
+  });
+
+  console.log("Rendering...");
+
   return (
-    <div>
-      Count {count}
-      <div style={{ display: 'flex' }}>
+    <div className="main-panel">
+      <div className="display">Count {count}</div>
+      <div style={{ display: "flex" }}>
         <button
           onClick={() => {
             if (running) {
@@ -151,14 +105,23 @@ const Timer = () => {
             } else {
               setRunning(true);
               interval.current = setInterval(() => {
-                setCount(c => c + 1);
+                console.log("running interval", new Date());
+                setCount((c) => c + 1);
               }, 1000);
             }
           }}
         >
-          {running ? 'Pause' : 'Start'}
+          {running ? "Pause" : "Start"}
         </button>
       </div>
+    </div>
+  );
+};
+
+const App = () => {
+  return (
+    <div>
+      <Timer />
     </div>
   );
 };
@@ -168,9 +131,9 @@ const Timer = () => {
 // logic is more complex rather than a single value
 const reducer = (state, action) => {
   switch (action.type) {
-    case 'increment':
+    case "increment":
       return { count: state.count + 1 };
-    case 'decrement':
+    case "decrement":
       return { count: state.count - 1 };
     default:
       throw new Error();
@@ -178,18 +141,40 @@ const reducer = (state, action) => {
 };
 
 const App = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-
-  useEffect(() => {
-    console.log(inputRef.current.value);
+  const [state, dispatch] = useReducer(reducer, {
+    count: 0,
   });
 
   return (
-    <Wrapper>
-      Count: {state.count}
-      <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
-      <button onClick={() => dispatch({ type: 'increment' })}>+</button>
-    </Wrapper>
+    <div className="main-panel">
+      <div className="display">Count: {state.count}</div>
+      <button onClick={() => dispatch({ type: "decrement" })}>-</button>
+      <button onClick={() => dispatch({ type: "increment" })}>+</button>
+    </div>
+  );
+};
+
+// Further, we can have an overarching state that we can "centralize"
+// and pass to other components as props, so they can be aware of changes
+// and react accordingly
+const Display = ({ count }) => <div className="display">Current {count}</div>;
+
+const Counter = ({ count, setCount }) => (
+  <div className="main-panel">
+    <Display count={count} />
+    <button onClick={() => setCount(count + 1)}>Increment</button>
+  </div>
+);
+
+const App = () => {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <pre>AppState: {JSON.stringify({ count }, null, 2)}</pre>
+      <br />
+      <Counter setCount={setCount} count={count} />
+    </div>
   );
 };
 
@@ -200,20 +185,15 @@ const App = () => {
 
 const Display = () => {
   const { count } = useContext(AppContext);
-
-  return (
-    <div>
-      <div>Current {count}</div>
-    </div>
-  );
+  return <div className="display">Current {count}</div>;
 };
 
 const Counter = () => {
   const { count, setCount } = useContext(AppContext);
 
   return (
-    <div>
-      <Display count={count} />
+    <div className="main-panel">
+      <Display />
       <button onClick={() => setCount(count + 1)}>Increment</button>
     </div>
   );
@@ -221,19 +201,134 @@ const Counter = () => {
 
 const Inner = () => {
   const { count } = useContext(AppContext);
+  return <pre>AppContext: {JSON.stringify({ count }, null, 2)}</pre>;
+};
 
+const OutsideProvider = () => {
+  const { count, setCount } = useContext(AppContext);
   return (
-    <Wrapper>
-      AppState: {JSON.stringify({ count })}
-      <Counter />
-    </Wrapper>
+    <div>
+      <h1>Outside Provider</h1>
+      <p>{count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
   );
 };
 
 const App = () => {
   return (
-    <AppProvider>
-      <Inner />
-    </AppProvider>
+    <>
+      {/* <OutsideProvider /> */}
+      <AppProvider>
+        <Inner />
+        <Counter />
+      </AppProvider>
+    </>
+  );
+};
+
+const App = () => {
+  const [v, setV] = useState(false);
+
+  return (
+    <button
+      style={{ backgroundColor: v ? "red" : "blue" }}
+      onClick={() => {
+        setV(!v);
+      }}
+    >
+      Toggle!
+    </button>
+  );
+};
+
+const App = () => {
+  const [v, toggle] = useToggle(false);
+  return (
+    <button style={{ backgroundColor: v ? "red" : "blue" }} onClick={toggle}>
+      Toggle!
+    </button>
+  );
+};
+
+const App = () => {
+  const { width, height } = useWindowSize();
+  const factor = 5;
+  return (
+    <div
+      className="main-panel"
+      style={{
+        height: height / factor,
+        width: width / factor,
+        display: "flex",
+        backgroundColor: "red",
+        justifyContent: "center",
+        alignItems: "center",
+        fontWeight: "bold",
+      }}
+    >
+      Window is {width} x {height}
+    </div>
+  );
+};
+
+const App = () => {
+  const { x, y } = useMousePosition();
+
+  return (
+    <div style={{ perspective: "1000px" }}>
+      <div
+        className="main-panel"
+        style={{
+          backgroundColor: "red",
+          transform: `rotateX(${-y / 10}deg) rotateY(${x / 10}deg)`,
+        }}
+      >
+        <img
+          src="https://upload.wikimedia.org/wikipedia/en/thumb/2/29/Harvard_shield_wreath.svg/1200px-Harvard_shield_wreath.svg.png"
+          style={{ height: 100, width: 100 }}
+          alt="Harvard"
+        />
+      </div>
+    </div>
+  );
+};
+
+const Counter = () => {
+  const interval = useRef();
+  const savedCallback = useRef(null);
+  const [count, setCount] = useState(0);
+
+  const callback = () => {
+    setCount(count + 1);
+  };
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    interval.current = setInterval(() => savedCallback.current(), 1000);
+    return () => clearInterval(interval.current);
+  }, []);
+
+  return (
+    <div className="main-panel">
+      <div className="display">Current {count}</div>
+    </div>
+  );
+};
+
+const Counter = () => {
+  const [count, setCount] = useState(0);
+
+  useInterval(() => {
+    setCount(count + 1);
+  }, 1000);
+
+  return (
+    <div className="main-panel">
+      <div className="display">Current {count}</div>
+    </div>
   );
 };

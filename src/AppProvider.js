@@ -1,12 +1,16 @@
-import React, { useContext, useState } from 'react';
-const AppContextClass = React.createContext({});
+import React, { useState } from 'react';
+
+export const AppContext = React.createContext({
+  count: 'No value here',
+  setCount: () => {
+    console.log('Im outside the provider :(');
+  },
+});
 
 const AppProvider = ({ children }) => {
   const [count, setCount] = useState(0);
 
-  return <AppContextClass.Provider value={{ count, setCount }}>{children}</AppContextClass.Provider>;
+  return <AppContext.Provider value={{ count, setCount }}>{children}</AppContext.Provider>;
 };
-
-export { AppContextClass as AppContext };
 
 export default AppProvider;
