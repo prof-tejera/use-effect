@@ -4,8 +4,8 @@
 // us to get and set a value, and have our component react to
 // changes very easily
 
-import { useEffect, useState } from "react";
-import { useInterval } from "./hooks";
+import { useEffect, useState } from 'react';
+import { useInterval } from './hooks';
 
 const Counter = () => {
   const [count, setCount] = useState(0);
@@ -27,10 +27,10 @@ const App = () => {
 // componentDidMount, componentDidUpdate and componentWillUnmount
 const Counter = ({ count, setCount }) => {
   useEffect(() => {
-    console.log("MOUNT Counter");
+    console.log('MOUNT Counter');
 
     return () => {
-      console.log("before UNMOUNT Counter");
+      console.log('before UNMOUNT Counter');
     };
   }, []);
 
@@ -45,29 +45,29 @@ const Counter = ({ count, setCount }) => {
 const App = () => {
   const [mounted, setMounted] = useState(true);
   const [count, setCount] = useState(0);
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
 
   useEffect(() => {
-    console.log("MOUNT App");
+    console.log('MOUNT App');
 
     return () => {
-      console.log("before UNMOUNT App");
+      console.log('before UNMOUNT App');
     };
   }, []);
 
   useEffect(() => {
-    console.log("after ANYTHING is updated");
+    console.log('after ANYTHING is updated');
 
     return () => {
-      console.log("before ANYTHING is updated");
+      console.log('before ANYTHING is updated');
     };
   });
 
   useEffect(() => {
-    console.log("after COUNT is updated");
+    console.log('after COUNT is updated');
 
     return () => {
-      console.log("before COUNT is updated");
+      console.log('before COUNT is updated');
     };
   }, [count]);
 
@@ -75,7 +75,7 @@ const App = () => {
     <div>
       <pre>AppState: {JSON.stringify({ count, text }, null, 2)}</pre>
       {mounted && <Counter setCount={setCount} count={count} />}
-      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <input value={text} onChange={e => setText(e.target.value)} />
       <button onClick={() => setMounted(!mounted)}>Unmount</button>
     </div>
   );
@@ -88,15 +88,15 @@ const Timer = () => {
   const interval = useRef();
 
   useEffect(() => {
-    console.log("Triggering effect");
+    console.log('Triggering effect');
   });
 
-  console.log("Rendering...");
+  console.log('Rendering...');
 
   return (
     <div className="main-panel">
       <div className="display">Count {count}</div>
-      <div style={{ display: "flex" }}>
+      <div style={{ display: 'flex' }}>
         <button
           onClick={() => {
             if (running) {
@@ -105,51 +105,15 @@ const Timer = () => {
             } else {
               setRunning(true);
               interval.current = setInterval(() => {
-                console.log("running interval", new Date());
-                setCount((c) => c + 1);
+                console.log('running interval', new Date());
+                setCount(c => c + 1);
               }, 1000);
             }
           }}
         >
-          {running ? "Pause" : "Start"}
+          {running ? 'Pause' : 'Start'}
         </button>
       </div>
-    </div>
-  );
-};
-
-const App = () => {
-  return (
-    <div>
-      <Timer />
-    </div>
-  );
-};
-
-// useReducer
-// this is an alternative to useState and can be used when the new state
-// logic is more complex rather than a single value
-const reducer = (state, action) => {
-  switch (action.type) {
-    case "increment":
-      return { count: state.count + 1 };
-    case "decrement":
-      return { count: state.count - 1 };
-    default:
-      throw new Error();
-  }
-};
-
-const App = () => {
-  const [state, dispatch] = useReducer(reducer, {
-    count: 0,
-  });
-
-  return (
-    <div className="main-panel">
-      <div className="display">Count: {state.count}</div>
-      <button onClick={() => dispatch({ type: "decrement" })}>-</button>
-      <button onClick={() => dispatch({ type: "increment" })}>+</button>
     </div>
   );
 };
@@ -178,61 +142,12 @@ const App = () => {
   );
 };
 
-// So far we've been managing state locally and passing it down explicitly
-// through props. Is there a better way? Yup, using React Context. It was specifically
-// designed so that state can be shared down a component tree, without prop drilling.
-// any component in the tree shares the context and can access it directly.
-
-const Display = () => {
-  const { count } = useContext(AppContext);
-  return <div className="display">Current {count}</div>;
-};
-
-const Counter = () => {
-  const { count, setCount } = useContext(AppContext);
-
-  return (
-    <div className="main-panel">
-      <Display />
-      <button onClick={() => setCount(count + 1)}>Increment</button>
-    </div>
-  );
-};
-
-const Inner = () => {
-  const { count } = useContext(AppContext);
-  return <pre>AppContext: {JSON.stringify({ count }, null, 2)}</pre>;
-};
-
-const OutsideProvider = () => {
-  const { count, setCount } = useContext(AppContext);
-  return (
-    <div>
-      <h1>Outside Provider</h1>
-      <p>{count}</p>
-      <button onClick={() => setCount(count + 1)}>Increment</button>
-    </div>
-  );
-};
-
-const App = () => {
-  return (
-    <>
-      {/* <OutsideProvider /> */}
-      <AppProvider>
-        <Inner />
-        <Counter />
-      </AppProvider>
-    </>
-  );
-};
-
 const App = () => {
   const [v, setV] = useState(false);
 
   return (
     <button
-      style={{ backgroundColor: v ? "red" : "blue" }}
+      style={{ backgroundColor: v ? 'red' : 'blue' }}
       onClick={() => {
         setV(!v);
       }}
@@ -245,7 +160,7 @@ const App = () => {
 const App = () => {
   const [v, toggle] = useToggle(false);
   return (
-    <button style={{ backgroundColor: v ? "red" : "blue" }} onClick={toggle}>
+    <button style={{ backgroundColor: v ? 'red' : 'blue' }} onClick={toggle}>
       Toggle!
     </button>
   );
@@ -260,11 +175,11 @@ const App = () => {
       style={{
         height: height / factor,
         width: width / factor,
-        display: "flex",
-        backgroundColor: "red",
-        justifyContent: "center",
-        alignItems: "center",
-        fontWeight: "bold",
+        display: 'flex',
+        backgroundColor: 'red',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontWeight: 'bold',
       }}
     >
       Window is {width} x {height}
@@ -276,11 +191,11 @@ const App = () => {
   const { x, y } = useMousePosition();
 
   return (
-    <div style={{ perspective: "1000px" }}>
+    <div style={{ perspective: '1000px' }}>
       <div
         className="main-panel"
         style={{
-          backgroundColor: "red",
+          backgroundColor: 'red',
           transform: `rotateX(${-y / 10}deg) rotateY(${x / 10}deg)`,
         }}
       >
@@ -290,45 +205,6 @@ const App = () => {
           alt="Harvard"
         />
       </div>
-    </div>
-  );
-};
-
-const Counter = () => {
-  const interval = useRef();
-  const savedCallback = useRef(null);
-  const [count, setCount] = useState(0);
-
-  const callback = () => {
-    setCount(count + 1);
-  };
-
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  useEffect(() => {
-    interval.current = setInterval(() => savedCallback.current(), 1000);
-    return () => clearInterval(interval.current);
-  }, []);
-
-  return (
-    <div className="main-panel">
-      <div className="display">Current {count}</div>
-    </div>
-  );
-};
-
-const Counter = () => {
-  const [count, setCount] = useState(0);
-
-  useInterval(() => {
-    setCount(count + 1);
-  }, 1000);
-
-  return (
-    <div className="main-panel">
-      <div className="display">Current {count}</div>
     </div>
   );
 };

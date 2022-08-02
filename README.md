@@ -1,70 +1,140 @@
-# Getting Started with Create React App
+## Review
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Last class we covered how to provide state management to components. We introduced the `useState` hook:
 
-## Available Scripts
+```jsx
+const Counter = () => {
+  const [count, setCount] = useState(0);
 
-In the project directory, you can run:
+  return (
+    <div className="main-panel">
+      <div className="display">Current {count}</div>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+```
 
-### `npm start`
+We also introduced a way to create side-effects using the `useEffect` hook:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```jsx
+const Counter = () => {
+  const [count, setCount] = useState(0);
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+  useEffect(() => {
+    console.log('Firing AFTER count changes!');
+  }, [count])
 
-### `npm test`
+  return (
+    <div className="main-panel">
+      <div className="display">Current {count}</div>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Lastly, we talked about `useRef`, which gives us a way to store values over time and modify them without triggering a re-render. It also gives us a way to bind to the DOM without querying the DOM directly:
 
-### `npm run build`
+```jsx
+const Counter = () => {
+  const [trigger, setTrigger] = useState(true);
+  const count = useRef(0);
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+  return (
+    <div className="main-panel">
+      <div className="display">Current {count.current}</div>
+      <button
+        onClick={() => {
+          count.current += 1;
+        }}
+      >
+        Increment
+      </button>
+      <button
+        onClick={() => {
+          setTrigger(!trigger);
+        }}
+      >
+        Re-render
+      </button>
+    </div>
+  );
+};
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Lets try an interesting example using timers:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```jsx
+const Counter = () => {
+  const [count, setCount] = useState(0);
 
-### `npm run eject`
+  useEffect(() => {
+    setTimeout(() => {
+      setCount(count + 1);
+    }, 5000);
+  }, [])
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+  return (
+    <div className="main-panel">
+      <div className="display">Current {count}</div>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+As you can see, clicking the button increments the count but when the timeout function fires, it has an old value. This is because when we *registered* the timeout function on mount (no dependencies in the array), the value was 0 and that's what it will use when it fires. The callback passed to `setTimeout` is not being updated. To fix this we can use a different version of the `setter` returned by `useState`. This receives a function which is passed the previous value of the state and returns the new value:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```jsx
+const Counter = () => {
+  const [count, setCount] = useState(0);
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+  useEffect(() => {
+    setTimeout(() => {
+      setCount(prevCount => {
+        return prevCount + 1
+      });
+    }, 5000);
+  }, [])
 
-## Learn More
+  return (
+    <div className="main-panel">
+      <div className="display">Current {count}</div>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+This works well, but sometimes we want to use updated values in our callback functions without using a setter function. 
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```jsx
+const Counter = () => {
+  const [trigger, setTrigger] = useState(true);
+  const [var1, setVar1] = useState('');
 
-### Code Splitting
+  const var2 = useRef('');
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+  useEffect(() => {
+    setTimeout(() => {
+      console.log('Var1', var1);
+      console.log('Var2', var2);
+    }, 5000);
+  }, []);
 
-### Analyzing the Bundle Size
+  return (
+    <div className="main-panel">
+      <input
+        value={var1}
+        onChange={v => {
+          setVar1(v.target.value);
+          var2.current = `the value of var1 is ${var1}`;
+        }}
+      />
+    </div>
+  );
+};
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Something interesting happened here - as you can see, `var2.current` logged the value of `var1` but missed the last change. If we typed `abc`, it will log `ab`. This is because `useState` is *asynchronous*. When we set the value, its not immediately available which is why we can only rely on `useEffect` to get the updated value.
