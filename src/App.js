@@ -3,31 +3,39 @@ import './App.css';
 // import { useInterval, useWindowSize, useMousePosition, useWindowSize1, useMousePosition1 } from './hooks';
 import Map from './map/Map';
 
-const Counter = () => {
-  const [var1, setVar1] = useState('');
-
-  const var2 = useRef('');
+const usePrevious = value => {
+  const previous = useRef();
 
   useEffect(() => {
-    setTimeout(() => {
-      console.log('Var1', var1);
-      console.log('Var2', var2);
-    }, 5000);
-  }, []);
+    previous.current = value;
+  }, [value]);
+
+  return previous.current;
+};
+
+const DiffInput = () => {
+  const [value, setValue] = useState('');
+  const previous = usePrevious(value);
 
   return (
-    <div className="main-panel">
-      <input
-        value={var1}
-        onChange={v => {
-          setVar1(v.target.value);
-          var2.current = `the value of var1 is ${var1}`;
+    <div>
+      <input type="text" value={value} onChange={e => setValue(e.target.value)} />
+      <div>
+        <b>Previous:</b> {previous}
+      </div>
+      <br />
+      <button
+        onClick={() => {
+          console.log('previous', previous);
+          setValue(previous);
         }}
-      />
+      >
+        Undo
+      </button>
     </div>
   );
 };
 
-const App = () => <Counter />;
+const App = () => <DiffInput />;
 
 export default App;
