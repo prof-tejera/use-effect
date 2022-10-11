@@ -1,41 +1,37 @@
-import React, { useContext, useLayoutEffect, useEffect, useRef, useState, useReducer, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
-// import { useInterval, useWindowSize, useMousePosition, useWindowSize1, useMousePosition1 } from './hooks';
-import Map from './map/Map';
 
-const usePrevious = value => {
-  const previous = useRef();
-
+const Even = ({ number }) => {
   useEffect(() => {
-    previous.current = value;
-  }, [value]);
+    console.log('updated Even');
+    return () => {
+      console.log('unmounted Even');
+    };
+  });
 
-  return previous.current;
+  return `Even ${number}`;
 };
 
-const DiffInput = () => {
-  const [value, setValue] = useState('');
-  const previous = usePrevious(value);
+const Odd = ({ number }) => {
+  useEffect(() => {
+    console.log('updated Odd');
+    return () => {
+      console.log('unmounted Odd');
+    };
+  });
+
+  return `Odd ${number}`;
+};
+
+const App = () => {
+  const [counter, setCounter] = useState(0);
 
   return (
-    <div>
-      <input type="text" value={value} onChange={e => setValue(e.target.value)} />
-      <div>
-        <b>Previous:</b> {previous}
-      </div>
-      <br />
-      <button
-        onClick={() => {
-          console.log('previous', previous);
-          setValue(previous);
-        }}
-      >
-        Undo
-      </button>
+    <div className="main-panel">
+      <div className="display">{counter % 2 ? <Odd number={counter} /> : <Even number={counter} />}</div>
+      <button onClick={() => setCounter(counter + 1)}>Inc</button>
     </div>
   );
 };
-
-const App = () => <DiffInput />;
 
 export default App;
